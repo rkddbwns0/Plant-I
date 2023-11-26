@@ -128,35 +128,3 @@ const MyPageCustom = ({ color, size, foused }) => {  // 마이페이지 아이�
   return <FontAwesome5 name = "user-alt" size = { 30 } color = { iConColor }/>
 }
 //#endregion
-
-const styles = StyleSheet.create({
-  container: {  
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexDirection: 'column'
-  },
-  Title: {
-    fontSize: 40,
-    fontWeight: '900',
-    margin: 50,
-    position: 'relative',
-    bottom: 50
-  },
-  InputForm: {
-    backgroundColor: 'white',
-    borderRadius: 10,
-  },
-  input: {
-    marginVertical: 25,
-    fontSize: 20,
-    width: 300,
-    borderBottomWidth: 0.8,
-    borderBottomColor: '#000000'
-  },
-  Form: {
-    marginTop: 15,
-    flexDirection: 'row',
-  }
-});
->>>>>>> e1f44321c583c3af8ed98b32271bf342d6151c23
