@@ -1,5 +1,4 @@
 import React from 'react';
-<<<<<<< HEAD
 import { TouchableOpacity } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -129,42 +128,6 @@ const MyPageCustom = ({ color, size, foused }) => {  // 마이페이지 아이�
   return <FontAwesome5 name = "user-alt" size = { 30 } color = { iConColor }/>
 }
 //#endregion
-=======
-import { Button, Linking, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import SigninBtn, { SignupBtn } from './component/Button';
-
-
-
-export default function App() {
-  return (
-    <View style={styles.container}>
-        <Text style = {styles.Title}>Plant-I</Text>
-      <View style = {styles.InputForm}>
-        <Text style = {{fontSize: 20, fontWeight: 'bold', position: 'relative', top: 15 }}>아이디</Text>
-        <TextInput style = {styles.input}></TextInput>
-        <Text style = {{fontSize: 20, fontWeight: 'bold', position: 'relative', top: 15 }}>비밀번호</Text>
-        <TextInput style = {styles.input} secureTextEntry={true}></TextInput>
-      </View>
-      <View style = {styles.Btn}>
-        <SigninBtn />
-        <SignupBtn />
-      </View>
-      {/* 아이디 찾기, 비밀번호 찾기 */}
-      <View style = {styles.Form}>
-        <TouchableOpacity activeOpacity={0.8} onPress={() => alert('아이디 찾기')}>
-              <Text style = {{ fontSize: 15, fontWeight: 'bold' }}>아이디 찾기</Text>
-        </TouchableOpacity>
-
-        <Text style = {{ fontWeight: 'bold', fontSize: 15 }}> / </Text>
-
-        <TouchableOpacity activeOpacity={0.8} onPress={() => alert('비밀번호 찾기')}>
-              <Text style = {{ fontSize: 15,fontWeight: 'bold'}}>비밀번호 찾기</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
-}
-
 
 const styles = StyleSheet.create({
   container: {  
