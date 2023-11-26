@@ -8,15 +8,15 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
-    "ios": {
-      "supportsTablet": true
-    },
-    "android": {
-    },
-    "web": {
-    }
+  "assetBundlePatterns": [
+    "**/*"
+  ],
+  "ios": {
+    "supportsTablet": true
+  },
+  "android": { 
+  },
+  "web": {
   }
 }
+
