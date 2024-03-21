@@ -31,8 +31,8 @@ const Stack = createNativeStackNavigator();
 const TabNavigator = () => (
     <Tab.Navigator
         screenOptions = {{ 
-            tabBarStyle: { height: 60, backgroundColor: '#a4c47a',}, 
-            tabBarLabelStyle: { fontSize: 12, fontWeight: 'bold', position: 'relative', bottom: 2 },
+            tabBarStyle: { height: 60, backgroundColor: '#CBDDB4',}, 
+            tabBarLabelStyle: { fontSize: 12, fontWeight: 'bold', position: 'relative', bottom: 5 },
             tabBarInactiveTintColor: 'grey',
             tabBarActiveTintColor: 'black',
             tabBarItemStyle: { justifyContent: 'center', alignItems: 'center', flexDirection: 'column' },
@@ -92,7 +92,7 @@ function App() {
               headerTitle: 'Plant-I', 
               headerTitleStyle: { fontSize: 35, fontWeight: 'bold', color: 'black'},
               headerTitleAlign: 'center',
-              headerStyle: { backgroundColor: '#a4c47a' },
+              headerStyle: { backgroundColor: '#CBDDB4' },
               headerShadowVisible: false,
               headerLeft: () => (
                 <TouchableOpacity onPress = { () => navigation.navigate("Weather")}>
@@ -111,7 +111,7 @@ function App() {
               headerTitle: 'Plant-I', 
               headerTitleStyle: { fontSize: 35, fontWeight: 'bold', color: 'black'},
               headerTitleAlign: 'center',
-              headerStyle: { backgroundColor: '#a4c47a' },
+              headerStyle: { backgroundColor: '#CBDDB4' },
               headerShadowVisible: false,
               headerLeft: () => (
                 <TouchableOpacity onPress = { () => navigation.navigate("Weather")}>
@@ -130,7 +130,7 @@ function App() {
                 headerTitle: 'Plant-I', 
                 headerTitleStyle: { fontSize: 35, fontWeight: 'bold', color: 'black'},
                 headerTitleAlign: 'center',
-                headerStyle: { backgroundColor: '#a4c47a' },
+                headerStyle: { backgroundColor: '#CBDDB4' },
                 headerShadowVisible: false,
                 headerLeft: () => (
                   <TouchableOpacity onPress = { () => navigation.navigate("Weather")}>
@@ -149,7 +149,7 @@ function App() {
                 headerTitle: 'Plant-I', 
                 headerTitleStyle: { fontSize: 35, fontWeight: 'bold', color: 'black'},
                 headerTitleAlign: 'center',
-                headerStyle: { backgroundColor: '#a4c47a' },
+                headerStyle: { backgroundColor: '#CBDDB4' },
                 headerShadowVisible: false,
                 headerLeft: () => (
                   <TouchableOpacity onPress = { () => navigation.navigate("Weather")}>
@@ -168,7 +168,7 @@ function App() {
                 headerTitle: 'Plant-I', 
                 headerTitleStyle: { fontSize: 35, fontWeight: 'bold', color: 'black'},
                 headerTitleAlign: 'center',
-                headerStyle: { backgroundColor: '#a4c47a' },
+                headerStyle: { backgroundColor: '#CBDDB4' },
                 headerShadowVisible: false,
                 headerLeft: () => (
                   <TouchableOpacity onPress = {() => navigation.navigate("Weather")}>
@@ -187,7 +187,7 @@ function App() {
                 headerTitle: 'Plant-I', 
                 headerTitleStyle: { fontSize: 35, fontWeight: 'bold', color: 'black'},
                 headerTitleAlign: 'center',
-                headerStyle: { backgroundColor: '#a4c47a' },
+                headerStyle: { backgroundColor: '#CBDDB4' },
                 headerShadowVisible: false,
                 headerLeft: () => (
                   <TouchableOpacity onPress = { () => navigation.navigate("Weather")}>
@@ -206,7 +206,7 @@ function App() {
                 headerTitle: 'Plant-I', 
                 headerTitleStyle: { fontSize: 35, fontWeight: 'bold', color: 'black'},
                 headerTitleAlign: 'center',
-                headerStyle: { backgroundColor: '#a4c47a' },
+                headerStyle: { backgroundColor: '#CBDDB4' },
                 headerShadowVisible: false,
                 headerLeft: () => (
                   <TouchableOpacity onPress = { () => navigation.navigate("Weather")}>
@@ -225,7 +225,7 @@ function App() {
                 headerTitle: 'Plant-I', 
                 headerTitleStyle: { fontSize: 35, fontWeight: 'bold', color: 'black'},
                 headerTitleAlign: 'center',
-                headerStyle: { backgroundColor: '#a4c47a' },
+                headerStyle: { backgroundColor: '#CBDDB4' },
                 headerShadowVisible: false,
                 headerLeft: () => (
                   <TouchableOpacity onPress = { () => navigation.navigate("Weather")}>
@@ -244,7 +244,7 @@ function App() {
                 headerTitle: 'Plant-I', 
                 headerTitleStyle: { fontSize: 35, fontWeight: 'bold', color: 'black'},
                 headerTitleAlign: 'center',
-                headerStyle: { backgroundColor: '#a4c47a' },
+                headerStyle: { backgroundColor: '#CBDDB4' },
                 headerShadowVisible: false,
                 headerLeft: () => (
                   <TouchableOpacity onPress = { () => navigation.navigate("Weather")}>
@@ -263,7 +263,7 @@ function App() {
                 headerTitle: 'Plant-I', 
                 headerTitleStyle: { fontSize: 35, fontWeight: 'bold', color: 'black'},
                 headerTitleAlign: 'center',
-                headerStyle: { backgroundColor: '#a4c47a' },
+                headerStyle: { backgroundColor: '#CBDDB4' },
                 headerShadowVisible: false,
                 headerLeft: () => (
                   <TouchableOpacity onPress = { () => navigation.navigate("Weather")}>
@@ -289,30 +289,30 @@ export default App;
 const HomeCustom = ({ color, size, foused }) => {  // 홈 아이콘
   const iConColor = foused ? 'black' : 'grey';
 
-  return (<Entypo name = "home" size = { 30 } color = { iConColor }/>)
+  return (<Entypo name = "home" size = { 25 } color = { iConColor }/>)
 }
 
 const MyCalendarCustom = ({ color, size, foused }) => {  // 달력 아이콘
   const iConColor = foused ? 'black' : 'grey';
 
-  return <Entypo name = "calendar" size = { 30 } color = { iConColor }/>
+  return <Entypo name = "calendar" size = { 25 } color = { iConColor }/>
 }
 
 const SearchCustom = ({ color, size, foused }) => {  // 검색 아이콘
   const iConColor = foused ? 'black' : 'grey';
 
-  return <FontAwesome name = "search" size = { 30 } color = { iConColor }/>
+  return <FontAwesome name = "search" size = { 25 } color = { iConColor }/>
 }
 
 const FavoriteCustom = ({ color, size, foused }) => {  // 즐겨찾기 아이콘
   const iConColor = foused ? 'black' : 'grey';
 
-  return <AntDesign name = "heart" size={ 30 } color = { iConColor }/>
+  return <AntDesign name = "heart" size={ 25 } color = { iConColor }/>
 }
 
 const MyPageCustom = ({ color, size, foused }) => {  // 마이페이지 아이콘
   const iConColor = foused ? 'black' : 'grey';  
 
-  return <FontAwesome5 name = "user-alt" size = { 30 } color = { iConColor }/>
+  return <FontAwesome5 name = "user-alt" size = { 25 } color = { iConColor }/>
 }
 //#endregion

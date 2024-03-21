@@ -4,7 +4,7 @@ import { Checkbox } from 'react-native-paper';
 import axios from 'axios';
 import { UserContext } from '../AuthContext/AuthContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Colors } from 'react-native/Libraries/NewAppScreen';
+import AppText from './AppText';
 
 function LoginPage( { navigation } ){
 
@@ -46,7 +46,7 @@ function LoginPage( { navigation } ){
   return (
     <View style={ styles.container }>
       
-      <Text style = { styles.Title }>Plant-I</Text>
+      <AppText style = { styles.Title }>Plant-I</AppText>
       {/* 아이디, 비밀번호 입력 */}
       <KeyboardAvoidingView>
         <View style = { styles.InputForm }>
@@ -74,33 +74,33 @@ function LoginPage( { navigation } ){
       {/* 체크 박스 (로그인 상태 유지, 아이디 저장) */}
       <View style = {styles.CheckBox}>
         <Checkbox status = {rememberUser ? 'checked' : 'unchecked'} onPress = { rememberUserBox } />
-        <Text style = {{ fontSize: 15, fontWeight: 'bold' ,marginBottom: 2 }}>로그인 상태 유지</Text>
+        <AppText style = {{ fontSize: 15 }}>로그인 상태 유지</AppText>
 
         <Checkbox status = {saveId ? 'checked' : 'unchecked'} onPress = { SaveIdBox } />
-        <Text style = {{ fontSize: 15, fontWeight: 'bold', marginBottom: 2}}>아이디 저장</Text>
+        <AppText style = {{ fontSize: 15 }}>아이디 저장</AppText>
       </View>
 
       {/* 로그인 및 회원가입 버튼 */}
       <View style = { styles.Btn }>
         <TouchableOpacity style = { styles.SignInBtn } onPress = { Login }>
-          <Text style = {{ fontSize: 20, fontWeight: 'bold', marginBottom: 3 }}>로그인</Text>
+          <AppText style = {{ fontSize: 20 }}>로그인</AppText>
         </TouchableOpacity>
               
         <TouchableOpacity style = { styles.SignupBtn } onPress = { () => { navigation.navigate("SignUp") }}>
-          <Text style = {{ fontSize: 20, fontWeight: 'bold', marginBottom: 3 }}>회원가입</Text>
+          <AppText style = {{ fontSize: 20 }}>회원가입</AppText>
         </TouchableOpacity>
       </View>
 
       {/* 아이디 찾기, 비밀번호 찾기 버튼*/}
       <View style = { styles.Form }>
         <TouchableOpacity activeOpacity={ 0.8 }  onPress={() => alert('아이디 찾기')}>
-          <Text style = {{ fontSize: 15, fontWeight: 'bold' }}>아이디 찾기</Text>
+          <AppText style = {{ fontSize: 15 }}>아이디 찾기</AppText>
         </TouchableOpacity>
 
-        <Text style = {{ fontWeight: 'bold', fontSize: 15 }}> / </Text>
+        <AppText style = {{ fontWeight: 'bold', fontSize: 15 }}> / </AppText>
 
         <TouchableOpacity activeOpacity={ 0.8 } onPress={() => alert('비밀번호 찾기')}>
-          <Text style = {{ fontSize: 15, fontWeight: 'bold'}}>비밀번호 찾기</Text>
+          <AppText style = {{ fontSize: 15 }}>비밀번호 찾기</AppText>
         </TouchableOpacity>
       </View>
       
@@ -121,7 +121,6 @@ const styles = StyleSheet.create({
   Title: {  // 타이틀
     marginTop: 40,
     fontSize: 50,
-    fontWeight: '900',
     position: 'relative',
     bottom: 60,
   },

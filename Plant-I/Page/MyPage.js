@@ -10,6 +10,7 @@ const MyPage = ({ navigation }) => {
 
   const { login, user } = useContext(UserContext);
   const [ userData, setUserData ] = useState([]);
+  const [ LogoutVisibled, setLogoutVisibled ] = useState(false);
 
   const handleEditProfile = () => {
     navigation.navigate("EditProfile", {
@@ -84,19 +85,31 @@ const MyPage = ({ navigation }) => {
     navigation.navigate("NotifySettings");
   }
 
-  const LogoutModal = () => {
+  const LogoutModal = ({ visible, Logout, Cancel }) => {
     return (
-      <Modal>
-        <View>
-          <Text>로그아웃 하시겠습니까?</Text>
-          <View>
-            <TouchableOpacity>
-              <Text>로그아웃</Text>
-            </TouchableOpacity>
+      <Modal
+        animationType = "none"
+        transparent = {true}
+        visible = {visible}
+      >
+        <View style = {styles.ModalContainer}>
+          <View style = {styles.ModalView}>
+            <Text style = {{ fontSize: 20, fontWeight: 'bold' }}>로그아웃 하시겠습니까?</Text>
+            <View style = {styles.ModalBtnContainer}>
+              <TouchableOpacity
+                style = {[ styles.BtnStyle, { backgroundColor: '#DADADA', right: 10 }]}
+                onPress = {Cancel}
+              >
+                <Text style = {{ fontSize: 16, fontWeight: 'bold'}}>취소</Text>
+              </TouchableOpacity>
 
-            <TouchableOpacity>
-              <Text>취소</Text>
-            </TouchableOpacity>
+              <TouchableOpacity
+                style = {[ styles.BtnStyle, { backgroundColor: '#CBDDB4', left: 10 }]}
+                onPress = {Logout}
+              >
+                <Text style = {{ fontSize: 16, fontWeight: 'bold' }}>로그아웃</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </Modal>
@@ -130,7 +143,7 @@ const MyPage = ({ navigation }) => {
         </TouchableOpacity>
 
         <TouchableOpacity
-          onPress = { LogoutModal() }
+          onPress = {() => setLogoutVisibled(true) }
           style = { styles.actionItem }
         >
           <Text style = { styles.settingText }>로그아웃</Text>
@@ -143,6 +156,11 @@ const MyPage = ({ navigation }) => {
           <Text style = { styles.settingText }>회원탈퇴</Text>
         </TouchableOpacity>
       </View>
+      <LogoutModal 
+        visible = {LogoutVisibled} 
+        Cancel = {() => setLogoutVisibled(false)} 
+        Logout = {() => {logout(); setLogoutVisibled(false);}}
+      />
     </View>
   );
 };
@@ -202,6 +220,30 @@ const styles = StyleSheet.create({
     marginLeft: 10, 
     fontWeight: "bold"
   },
+  ModalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  ModalView: {
+    backgroundColor: 'white',
+    padding: 40,
+    borderRadius: 10,
+    elevation: 5,
+    alignItems: 'center'
+  },
+  ModalBtnContainer: {
+    flexDirection: 'row',
+    width: '100%',
+    top: 25,
+  },
+  BtnStyle: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 120,
+    height: 45,
+    borderRadius: 10
+  }
 });
 
 export default MyPage;
