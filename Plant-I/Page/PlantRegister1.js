@@ -1,9 +1,11 @@
-import React, { useState, useContext, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Alert } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, StyleSheet, TouchableOpacity, ScrollView, KeyboardAvoidingView } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import axios from 'axios';
-
-import PlantRegister2 from './PlantRegister2';
+import AppText from '../Components/AppText';
+import CustomInput from '../Components/CustomInput';
+import AlertModal from '../Components/AlertModal';
+import SERVER_ADDRESS from "../Components/ServerAddress";
 
 const PlantRegister1 = ({ navigation }) => {
 
@@ -12,6 +14,7 @@ const PlantRegister1 = ({ navigation }) => {
     const [ selectData, setSelectData ] = useState("");
     const [ ClickDataColor, setClickDataColor ] = useState("");
     const [ disabled, setDisabled ] = useState(false);
+    const [ failSelectData, setFailSelectData ] = useState(false);
 
     const handleDataSelect = (selected) => {
         setSelectData(selected);
@@ -20,7 +23,7 @@ const PlantRegister1 = ({ navigation }) => {
 
     const handleNextPage = () => {
         if(selectData === "") {
-            alert("식물을 선택해주세요.")
+            setFailSelectData(true);
         } else {
             setDisabled(true);
             navigation.navigate('PlantRegister2', { selectData: selectData });
@@ -28,11 +31,10 @@ const PlantRegister1 = ({ navigation }) => {
         }
     }
 
-
     useEffect(() => {
         const SearchData = async () => {
             try {
-                const response = await axios.get("http://10.0.2.2:8080/plantdb/Pname");
+                const response = await axios.get(`${SERVER_ADDRESS}/plantdb/Pname`);
                 const data = response.data;
                 setPlantList(data);
             }
@@ -45,54 +47,67 @@ const PlantRegister1 = ({ navigation }) => {
     
 
     return (
-        <View style = { styles.container }>
-            <View style = { styles.BackBtnContainer }>
-                <TouchableOpacity 
-                    style = { styles.BackBtn }
-                    onPress = {() => navigation.pop()}
-                >
-                    <FontAwesome name = "angle-left" size={ 40 } color = "#757575" />
-                    <Text style = {{ fontSize: 18, fontWeight: 'bold', marginLeft: 5, color: '#757575' }}>뒤로</Text>
-                </TouchableOpacity>
-            </View>
-            <View>
-                <TextInput 
-                    style = { styles.SearchView }
-                    placeholder = '키우는 식물을 검색해주세요.'
-                    clearButtonMode='always'
-                    blurOnSubmit = { false }
-                    value = { Search }
-                    onChangeText = { setSearch }
+        <KeyboardAvoidingView
+            style = {{ flex: 1 }}
+        >
+            <View style = { styles.container }>
+                <View style = { styles.BackBtnContainer }>
+                    <TouchableOpacity 
+                        style = { styles.BackBtn }
+                        onPress = {() => navigation.pop()}
+                    >
+                        <FontAwesome name = "angle-left" size={ 40 } color = "#757575" />
+                        <AppText bold style = {{ fontSize: 18, marginLeft: 5, color: '#757575' }}>뒤로</AppText>
+                    </TouchableOpacity>
+                </View>
+                <View>
+                    <CustomInput 
+                        style = { styles.SearchView }
+                        placeholder = '키우는 식물을 검색해주세요.'
+                        clearButtonMode='always'
+                        blurOnSubmit = { false }
+                        value = { Search }
+                        onChangeText = { setSearch }
+                    />
+                </View>
+
+                <View style = {{ height: '75%' }}>
+                    <ScrollView>
+                        {PlantList.filter(data => data.Pname.includes(Search)).map((data, index) => (
+                            <View key = { index } style = { styles.ScrollContainer }>
+                                <TouchableOpacity 
+                                    style = {[ styles.PlantData, selectData == data ? styles.ClickDataColors : null ]}
+                                    activeOpacity = { 0.5 }
+                                    onPress = {() => { 
+                                        handleDataSelect(data);
+                                    }}
+                                >
+                                    <AppText bold style = {{ fontSize: 15 }} allowFontScaling = { false }>{ data.Pname }</AppText>
+                                </TouchableOpacity>
+                            </View>
+                        ))}
+                    </ScrollView>
+                </View>
+
+                <View style = { styles.NextBtnContainer}>
+                    <TouchableOpacity
+                        style = {[ styles.NextBtn ]}
+                        onPress = { handleNextPage }
+                    >
+                        <AppText bold style = {{ fontSize: 15 }} allowFontScaling = { false }>다음</AppText>
+                    </TouchableOpacity>
+                </View>
+
+                <AlertModal 
+                    visible = { failSelectData }
+                    onRequestClose = {() => setFailSelectData(false)}
+                    title = "식물을 선택해 주세요."
+                    BtnText = "확인"
+                    onPress = {() => setFailSelectData(false)}
+                    showBtn= { true }
                 />
             </View>
-
-            <View style = {{ height: '71%' }}>
-                <ScrollView>
-                    {PlantList.filter(data => data.pname.includes(Search)).map((data, index) => (
-                        <View key = { index } style = { styles.ScrollContainer }>
-                            <TouchableOpacity 
-                                style = {[ styles.PlantData, selectData == data ? styles.ClickDataColors : null ]}
-                                activeOpacity = { 0.5 }
-                                onPress = {() => { 
-                                    handleDataSelect(data);
-                                }}
-                            >
-                                <Text style = {{ fontSize: 15, fontWeight: 'bold', marginBottom: 2 }}>{ data.pname }</Text>
-                            </TouchableOpacity>
-                        </View>
-                    ))}
-                </ScrollView>
-            </View>
-
-            <View style = { styles.NextBtnContainer}>
-                <TouchableOpacity
-                    style = {[ styles.NextBtn ]}
-                    onPress = { handleNextPage }
-                >
-                    <Text style = {{ fontSize: 15, fontWeight: 'bold'}}>다음</Text>
-                </TouchableOpacity>
-            </View>
-        </View>
+        </KeyboardAvoidingView>
     )
 }
 
@@ -101,7 +116,8 @@ export default PlantRegister1;
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1
+        flex: 1,
+        backgroundColor: 'white'
     },
     BackBtnContainer: {
         width: '18%'
@@ -109,8 +125,9 @@ const styles = StyleSheet.create({
     BackBtn: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginLeft: 15,
-        marginTop: 8,
+        justifyContent: 'center',
+        marginLeft: '15%',
+        marginTop: '6%',
     },  
     SearchView: {
         alignSelf: 'center',
@@ -121,8 +138,7 @@ const styles = StyleSheet.create({
         height: 50,
         padding: 10,
         fontSize: 15,
-        fontWeight: '600',
-        margin: 8
+        margin: '2%'
     },
     ScrollContainer: {
         flex: 1,
@@ -143,19 +159,16 @@ const styles = StyleSheet.create({
         flex: 1,
         alignContent: 'center',
         alignItems: 'center',
-        justifyContent: 'center'
+        justifyContent: 'center',
     }, 
     NextBtn: {
         backgroundColor: '#DADADA',
         width: "60%",
-        height: 50,
+        height: '80%',
         borderRadius: 10,
         justifyContent: 'center',
         alignContent: 'center',
         alignItems: 'center',
-    },
-    selectData: {
-        backgroundColor: 'blue'
     },
     selected: {
         backgroundColor: 'transparent'

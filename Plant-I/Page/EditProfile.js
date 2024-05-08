@@ -1,27 +1,48 @@
-import React, { useContext, useEffect, useState } from "react";
-import { View, Text, TextInput, StyleSheet, TouchableOpacity } from "react-native";
-import { UserContext } from "../AuthContext/AuthContext";
+import React, { useEffect, useState } from "react";
+import { View, StyleSheet, TouchableOpacity, KeyboardAvoidingView } from "react-native";
 import { FontAwesome, Octicons } from '@expo/vector-icons';
 import axios from "axios";
+import AppText from "../Components/AppText";
+import AlertModal from "../Components/AlertModal";
+import CustomInput from '../Components/CustomInput';
+import SERVER_ADDRESS from "../Components/ServerAddress";
 
 const EditProfile = ({ navigation, route }) => {
-
-    const { login, user } = useContext(UserContext);
-    const { id } = route.params;
-    const { Nname } = route.params;
+     
+    const { id, Nname } = route.params;
     const [ NickName, setNickName ] = useState("");
+    const [ SuccessVisibled, setSuccessVisibled ] = useState(false);
+    const [ FailVisibled, setFailVisibled ] = useState(false);
 
     const UpdateData = () => {
-        axios.post('http://10.0.2.2:8080/userdb/update', {
-            id: user.id,
+        axios.post(`${SERVER_ADDRESS}/userdb/update`, {
+            id: id,
             Nname: NickName
         })
         .then(response => {
             console.log(response.data);
-            alert("닉네임이 변경되었습니다!");
+            setSuccessVisibled(false)
+            navigation.pop();
         })
         .catch (error =>  {
             console.log(error)
+        })
+    };
+
+    const CheckNname = () => {
+        axios.post(`${SERVER_ADDRESS}/userdb/CheckNickname`, {
+            Nname: NickName
+        })
+        .then(response => {
+            const data = response.data
+            if(data.message === "이미 사용 중인 닉네임입니다." || data.message === "닉네임을 입력해 주세요.") {
+                setFailVisibled(true);
+            } else if (data.message === "사용 가능한 닉네임입니다.") {
+                setSuccessVisibled(true);
+            }
+        })
+        .catch (error => {
+          console.log(error);
         })
     }
 
@@ -29,39 +50,38 @@ const EditProfile = ({ navigation, route }) => {
         setNickName(route.params?.Nname);
     }, [route.params?.Nname]);
 
-    const handleUpdateProfile = () => {
-        UpdateData();
-        navigation.pop();
-    }
-    
     return(
+        <KeyboardAvoidingView
+        style={{ flex: 1, width: '100%' }}
+      >
         <View style={styles.container}>
             <View style = { styles.TopContainer }>
                 <TouchableOpacity 
-                    style = { styles.BackBtn }
+                    style = {{ flex: 1, alignItems: 'flex-start' }}
                     onPress = {() => navigation.pop()}
                 >
-                    <FontAwesome name = "angle-left" size={ 45 } color = "black"/>
+                    <FontAwesome name = "angle-left" size={ 35 } color = "black" />
                 </TouchableOpacity>
 
-                <View style = { styles.TitleContainer }>
-                    <Text style = { styles.Title }>닉네임 변경</Text>
-                </View>
+                <AppText bold style = {styles.Title} allowFontScaling = { false }>닉네임 변경</AppText>
+                <View style = {{ flex: 1 }} />
             </View>
 
             <View style = { styles.FontContainer }>
-                <Text style = {{ fontSize: 22, fontWeight: 'bold' }}>닉네임을 입력해 주세요.</Text>
-                <Text
-                    style = {{ fontSize: 17, fontWeight: 'bold', color: '#595858', marginTop: 10 }}
+                <AppText bold style = {{ fontSize: 22 }} allowFontScaling = { false }>닉네임을 입력해 주세요.</AppText>
+                <AppText
+                    style = {{ fontSize: 17, color: '#595858', marginTop: '3%' }}
+                    allowFontScaling = { false }
                 >
                     한글, 영어, 숫자 조합의 1-15자{'\n'}길이의 닉네임으로 설정해 주세요.
-                </Text>
+                </AppText>
             </View>
 
             <View style = { styles.TextInputContainer }>
-                <Text style = {{ fontSize: 18, fontWeight: 'bold' }}>닉네임</Text>
+                <AppText bold style = {{ fontSize: 18 }} allowFontScaling = { false }>닉네임</AppText>
                 <View>
-                    <TextInput
+                    <CustomInput
+                        bold
                         style={ styles.TextinputStyle }
                         placeholderTextColor = 'black'
                         value = { NickName }
@@ -74,12 +94,31 @@ const EditProfile = ({ navigation, route }) => {
             <View style = { styles.BtnContainer }>
                 <TouchableOpacity 
                     style = { styles.BtnStyle }
-                    onPress = { handleUpdateProfile }
+                    onPress = { CheckNname }
                 >
-                    <Text style = {{ fontSize: 20, fontWeight: 'bold' }}>저장</Text>
+                    <AppText bold style = {{ fontSize: 20 }} allowFontScaling = { false }>저장</AppText>
                 </TouchableOpacity>
             </View>
+
+            <AlertModal 
+                visible = {SuccessVisibled}
+                onRequestClose = {() => setSuccessVisibled(false)}
+                title = "닉네임이 변경되었습니다."
+                onPress = {() => UpdateData()}
+                BtnText = "확인"
+                showBtn = {true}
+            />
+
+            <AlertModal 
+                visible = {FailVisibled}
+                onRequestClose = {() => setFailVisibled(false)}
+                title = "이미 사용 중인 닉네임입니다."
+                onPress = {() => setFailVisibled(false)}
+                BtnText = "확인"
+                showBtn = {true}
+            />
         </View>
+        </KeyboardAvoidingView>
     )
 }
 export default EditProfile;
@@ -87,61 +126,57 @@ export default EditProfile;
 const styles = StyleSheet.create({
     container: {
       flex: 1,
+      backgroundColor: 'white'
     },
     TopContainer: {
         flexDirection: 'row',
-        alignItems: 'center',
-        height: 75,
         borderBottomWidth: 1,
-        justifyContent: 'space-between'
+        borderBottomColor: 'black',
+        padding: '3%',
+        alignItems: 'center'
     },
-    BackBtn: {
-        marginLeft: 10
-    },
-    TitleContainer: {
-        position: 'absolute',
-        top: '50%,',
-        left: '50%',
-        transform: [{ translateX: -50 }]
-    },  
     Title: {
         fontSize: 22,
-        fontWeight: "bold",
+        textAlign: 'center'
     },
     FontContainer: {
-        marginTop: 20,
-        marginLeft: 20
+        marginTop: '5%',
+        marginLeft: '5%'
     },
     TextInputContainer: {
-        marginTop: 30,
-        marginLeft: 20
+        marginTop: '6%',
+        marginLeft: '5%'
     },
     TextinputStyle: {
-        width: 360,
+        width: '94%',
         height: 50,
         padding: 8, 
         borderBottomWidth: 1,
         borderColor: '#979797',
-        fontSize: 20,
-        color: '#595858'
+        fontSize: 18,
+        color: '#595858',
+        textAlignVertical: 'bottom'
     },
     IconStyle: {
         fontSize: 24,
         color: '#595858',
-        left: 330,
-        bottom: 33
+        bottom: '45%',
+        left: '86%'
     },
     BtnContainer: {
         alignSelf: 'center',
-        marginTop: 250
+        width: '65%',
+        height: '15%',
+        justifyContent: 'center',
+        top: "40%"
     },
     BtnStyle: {
         backgroundColor: '#DADADA',
-        width: 280,
-        height: 50,
+        width: '100%',
+        height: '50%',
         borderRadius: 18,
         alignItems: 'center',
         alignContent: 'center',
-        justifyContent: 'center'
+        justifyContent: 'center',
     },
   });

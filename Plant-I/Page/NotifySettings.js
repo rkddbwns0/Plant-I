@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Switch } from "react-native";
-import { AntDesign, Feather, FontAwesome } from '@expo/vector-icons';
+import { FontAwesome } from '@expo/vector-icons';
 
 const NotifySettings = ({ navigation }) => {
 
@@ -68,7 +68,8 @@ export default NotifySettings;
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1
+        flex: 1,
+        backgroundColor: 'white'
     },
     TopContainer: {
         flexDirection: 'row',

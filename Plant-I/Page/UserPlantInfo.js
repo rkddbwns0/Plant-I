@@ -1,50 +1,33 @@
-import React, { useState, useContext, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, TextInput, KeyboardAvoidingView, Alert, ScrollView, Modal } from 'react-native';
-import { Feather, AntDesign, Octicons, MaterialIcons } from '@expo/vector-icons';
-import { Calendar, LocaleConfig } from "react-native-calendars";
+import React, { useState, useContext } from 'react';
+import { View, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Image} from 'react-native';
+import { Octicons, MaterialIcons } from '@expo/vector-icons';
 import { UserContext } from '../AuthContext/AuthContext';
 import axios from 'axios';
+import AppText from '../Components/AppText';
+import AlertModal from '../Components/AlertModal';
+import CustomInput from '../Components/CustomInput';
+import SERVER_ADDRESS from "../Components/ServerAddress";
 
-const UserPlantInfo = ({ route, data, navigation  }) => {
+const UserPlantInfo = ({ route, navigation  }) => {
 
     const { login, user } = useContext(UserContext)
-    const { Pname } = route.params;
-    const { PNname } = route.params;
-    const { plant_date } = route.params;
-    const { place } = route.params;
-    const [ isVisibledCalendar, setIsVisibledCalendar ] = useState(false);
-    const [ open, setOpen ] = useState(false);
-    const [ value, setValue ] = useState(null);
-    const [ items, setItems ] = useState([]);
-    const [ selected, setSelected ] = useState('');
-
-    const onDayPress = (day) => {
-        setPlantDate(day.dateString);
-        setIsVisibledCalendar(false);
-    }
-
-    LocaleConfig.locales['ko'] = {
-        monthNames: ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'],
-        monthNamesShort: ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'],
-        dayNames: ['일', '월', '화', '수', '목', '금', '토'],
-        dayNamesShort: ['일', '월', '화', '수', '목', '금', '토'],
-        today: '오늘'
-      };
-    LocaleConfig.defaultLocale = 'ko';
+    const { No, Pname, PNname, Plant_Date, Place, image } = route.params;
+    const [ DeleteVisibled, setDeleteVisibled ] = useState(false);
 
     const DeleteData = () => {
-        axios.delete('http://10.0.2.2:8080/userplantdb', {
+        axios.delete(`${SERVER_ADDRESS}/userplantdb/delete`, {
             data: {
-                id: user.id,
+                No: No,
+                Id: user.id,
                 pname: Pname,
                 pnname: PNname,
-                plant_date: plant_date,
-                place: place
+                Plant_Date: Plant_Date,
+                Place: Place,
+                Image: image
             }
         })
         .then(response => {
             console.log("삭제 완료", response.data);
-            alert("삭제되었습니다");
             navigation.navigate('Home');
         })
         .catch(error => {
@@ -52,129 +35,95 @@ const UserPlantInfo = ({ route, data, navigation  }) => {
         });
     }
 
-    const handleDelete = () => {
-        Alert.alert("삭제", "정보를 삭제하겠습니까?", 
-            [
-                {
-                text: '삭제하기',
-                onPress: () => DeleteData()
-                },
-                {
-                    text: '취소',
-                    onPress: () => console.log("취소")
-                },
-            ],
-            { cancelable: false }
-        );
-    }
-
     return (
-            <View style = { styles.container }>
-                <Modal
-                    visible = { isVisibledCalendar }
-                    animationType = 'fade'
-                    transparent = { true }
-                    onRequestClose = {() => {
-                        setIsVisibledCalendar(prev => !prev)
-                    }}
-                    presentationStyle='overFullScreen'
-                >
-                    <View style = { styles.ModalView }>
-                        <Calendar 
-                            style = { styles.CalendarStyle }
-                            theme = {{ 
-                                todayTextColor: '#CBDDB4',
-                                textMonthFontSize: 18,
-                                textDayFontSize: 14,
-                                textDayHeaderFontSize: 14,
-                                textMonthFontWeight : 'bold',
-                                arrowColor: 'black',
-                                weekVerticalMargin: 10
-                            }}
-                            renderArrow = {(direction) => direction === "left" ? (
-                                <AntDesign name="left" size={ 18 } color="black" />
-                            ) : (
-                                <AntDesign name="right" size={ 18 } color="black" />
-                            )}
-                            onDayLongPress= { day => {
-                                setSelected(day.dateString);
-                            }}
-                            monthFormat = {'yyyy년 M월'}
-                            onDayPress = { onDayPress }
+        <View style = { styles.container }> 
+            <View style = { styles.PlantDataContainer }>
+                <View style = { styles.imgInfo }>
+                    <TouchableOpacity style = { styles.ImgbtnStyle }>
+                        <Image 
+                            style = {{ width: '100%', height: '100%', borderRadius: 7 }}
+                            source={{ uri: route.params?.image }}
                         />
-                    </View>
-                </Modal>
-                
-                <ScrollView
-                    style = { styles.ScrollContainer }
-                >
-                    <View style = { styles.imgInfo }>
-                        <TouchableOpacity style = { styles.ImgbtnStyle }>
-                            <Feather name = "image" size={ 50 } color = "#CDD0CB" />
-                        </TouchableOpacity>
-                    </View>   
-                    <View style = { styles.PlantName }>
-                        <Text style = {{ fontSize: 18 ,fontWeight: 'bold', marginBottom: 2 }}>{ route.params?.Pname }</Text>
-                    </View>
+                    </TouchableOpacity>
+                </View>   
+                <View style = { styles.PlantName }>
+                    <TouchableOpacity
+                        style = {{ width: '100%', alignItems: 'center' }}
+                        onPress={() => {navigation.navigate("PlantDetail",{Pname: Pname})}}
+                    >
+                        <AppText bold style = {{ fontSize: 18 }} allowFontScaling = { false }>{ route.params?.Pname }</AppText>
+                    </TouchableOpacity>
+                </View>
 
-                    <KeyboardAvoidingView>
-                        <View style = { styles.UserPlantInfoStyle }>
-                            <View style = { styles.InfoStyle }>
-                                <Text style = { styles.infoText }>키우기 시작한 날</Text>
-                                <TextInput 
-                                    style = { styles.InfoDataStyle }
-                                    value = { plant_date }
-                                    textAlign = 'center'
-                                    editable = { false }
-                                />
-                            </View>
-
-                            <View style = { styles.InfoStyle }> 
-                                <Text style = { styles.infoText }>식물 별명</Text>
-                                <TextInput 
-                                    style = { styles.InfoDataStyle }
-                                    value = { PNname }
-                                    textAlign = 'center'
-                                    editable = { false }
-                                />
-                            </View>
-
-                            <View style = { styles.InfoStyle }>
-                            <Text style = { styles.infoText }>키우는 곳</Text>
-                                <TextInput 
-                                    style = { styles.InfoDataStyle }
-                                    value = { place }
-                                    textAlign = 'center'
-                                    editable = { false }
-                                />
-                            </View>
+                <KeyboardAvoidingView>
+                    <View style = { styles.UserPlantInfoStyle }>
+                        <View style = { styles.InfoStyle }>
+                            <AppText bold style = { styles.infoText } allowFontScaling = { false }>키우기 시작한 날</AppText>
+                            <CustomInput 
+                                style = { styles.InfoDataStyle }
+                                value = { Plant_Date }
+                                textAlign = 'center'
+                                editable = { false }
+                            />
                         </View>
-                    </KeyboardAvoidingView>
 
-                    <View style = { styles.BtnStyle }>
-                        <TouchableOpacity 
-                            style = { styles.DeleteBtn }
-                            onPress={ handleDelete }
-                        >
-                            <MaterialIcons name="delete" size = { 24 } color="#757575" />
-                            <Text style = {{ fontSize: 18 ,fontWeight: 'bold', color: '#757575' }}>삭제</Text>
-                        </TouchableOpacity>
+                        <View style = { styles.InfoStyle }> 
+                            <AppText bold style = { styles.infoText } allowFontScaling = { false }>식물 별명</AppText>
+                            <CustomInput 
+                                style = { styles.InfoDataStyle }
+                                value = { PNname }
+                                textAlign = 'center'
+                                editable = { false }
+                            />
+                        </View>
 
-                        <TouchableOpacity
-                            style = { styles.UpdateBtn }
-                            onPress = {() => navigation.navigate("EditPlantInfo", {
-                                Pname: Pname,
-                                PNname: PNname,
-                                plant_date: plant_date,
-                                place: place
-                              })}
-                        >
-                            <Octicons name = "pencil" size = { 24 } color="#757575" />
-                            <Text style = {{ fontSize: 18 ,fontWeight: 'bold', color: '#757575' }}>수정</Text>
-                        </TouchableOpacity>
+                        <View style = { styles.InfoStyle }>
+                            <AppText bold style = { styles.infoText } allowFontScaling = { false }>키우는 곳</AppText>
+                            <CustomInput
+                                style = { styles.InfoDataStyle }
+                                value = { Place }
+                                textAlign = 'center'
+                                editable = { false }
+                            />
+                        </View>
                     </View>
-                </ScrollView>
+                </KeyboardAvoidingView>
             </View>
+            <View style = { styles.BtnStyle }>
+                <TouchableOpacity 
+                    style = { styles.DeleteBtn }
+                    onPress={() => setDeleteVisibled(true)}
+                >
+                    <MaterialIcons name="delete" size = { 20 } color="#757575" />
+                    <AppText bold style = {{ fontSize: 15 , color: '#757575', }} allowFontScaling = { false }>삭제</AppText>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    style = { styles.UpdateBtn }
+                    onPress = {() => navigation.navigate("EditPlantInfo", {
+                        No: No,
+                        Pname: Pname,
+                        PNname: PNname,
+                        Plant_Date: Plant_Date,
+                        Place: Place,
+                        image: image
+                      })}
+                >
+                    <Octicons name = "pencil" size = { 20 } color="#757575" />
+                    <AppText bold style = {{ fontSize: 15 , color: '#757575' }} allowFontScaling = { false }>수정</AppText>
+                </TouchableOpacity>
+            </View>
+            <AlertModal 
+                visible = {DeleteVisibled}
+                onRequestClose = {() => setDeleteVisibled(false)}
+                title = "해당 식물을 삭제하겠습니까?"
+                CancelBtnText = "아니오"
+                BtnText = "네"
+                onCancel = {() => setDeleteVisibled(false)}
+                onPress = {DeleteData}
+                showBtn = {true}
+            />
+        </View>
     );
 };
 
@@ -182,11 +131,12 @@ export default UserPlantInfo;
 
 const styles = StyleSheet.create({
     container: {  // 전체 View 구성
-        flex: 1
+        flex: 1,
+        backgroundColor: 'white'
     }, 
-    ScrollContainer: {
-        width: '100%',
-        height: '100%',
+    PlantDataContainer: {
+        justifyContent: 'center',
+        marginTop: '4%'
     },
     PlantName: {
         justifyContent: 'center',
@@ -194,81 +144,67 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         alignSelf: 'center',
         backgroundColor: '#CBDDB4',
-        borderRadius: 3,
-        width: 230,
-        height: 40,
+        borderRadius: 5,
+        width: '62%',
+        height: 42,
         borderRadius: 8,
-        marginTop: 10
+        marginTop: '5%',
     },
     UserPlantInfoStyle: {
-        marginBottom: 30,
-        marginTop: 20
+        marginTop: '5%'
     },
     InfoStyle: {
         flexDirection: 'row',
         alignContent: 'center',
         alignItems: 'center',
         justifyContent: 'space-between',
-        marginHorizontal: 30
+        marginHorizontal: '6%'
     },
     infoText: {
-        fontSize: 18,
-        fontWeight: 'bold'
+        fontSize: 16,
     },
     InfoDataStyle: {
-        borderWidth: 2,
+        borderWidth: 1,
         borderColor: "#CDD0CB",
-        width: 180,
+        width: '55%',
         height: 45,
         fontSize: 15,
-        fontWeight: 'bold',
-        marginVertical: 15,
-        padding: 10,
+        marginVertical: '6%',
         borderRadius: 8,
-        color: 'black'
+        color: '#608C27'
     },
     imgInfo: {
-        marginTop: 30
+        marginTop: '7%'
     },
     ImgbtnStyle: {
         borderWidth: 1,
         borderColor: "#CDD0CB",
-        width: 180,
-        height: 180,
+        width: '55%',
+        height: 200,
         fontSize: 15,
         fontWeight: 'bold',
         marginVertical: 18,
-        padding: 10,
         borderRadius: 8,
         alignContent: 'center',
         alignItems: 'center',
         justifyContent: 'center',
         alignSelf: 'center'
     },
-    ModalView: {
-        backgroundColor: 'white',
-        width: 320,
-        height: 420,
-        alignSelf: 'center',
-        borderRadius: 10,
-        borderWidth: 0.5,
-        borderColor: '#CBDDB4',
-        marginTop: 150
-    },
-    CalendarStyle: {
-        alignSelf: "center",
-        width: '95%',
-        height: '87%',
-        padding: 5
-    },
     BtnStyle: {
+        position: 'absolute',
         flexDirection: 'row',
         height: 40,
         justifyContent: 'space-between',
-        marginHorizontal: 40,
-        marginBottom: 20
+        bottom: '3%',
+        right: '7%',
+        left: '7%'
     },
     UpdateBtn: {
+        alignContent: 'center',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    DeleteBtn: {
         alignContent: 'center',
         alignItems: 'center',
         justifyContent: 'center',
