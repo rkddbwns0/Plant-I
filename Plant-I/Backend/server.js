@@ -17,7 +17,7 @@ const port = 8080;
 
 app.use(bodyParser.json());
 app.use(cors({
-  origin: "http://172.30.1.67"
+  origin: "http://서버주소"
 }));
 
 app.use(express.json());
