@@ -1,106 +1,158 @@
-import React, { useContext, useEffect, useState, useCallback } from "react";
-import { View, TouchableOpacity, StyleSheet, ScrollView, KeyboardAvoidingView } from "react-native";
-import { useFocusEffect } from "@react-navigation/native";
-import { FontAwesome, Ionicons, Entypo, SimpleLineIcons } from '@expo/vector-icons';
-import { UserContext } from "../AuthContext/AuthContext";
-import AppText from "../Components/AppText";
-import axios from "axios";
-import AlertModal from "../Components/AlertModal";
-import CustomInput from '../Components/CustomInput';
-import SERVER_ADDRESS from "../Components/ServerAddress";
+import React, { useContext, useEffect, useState, useCallback, useRef } from 'react';
+import { View, TouchableOpacity, StyleSheet, ScrollView, KeyboardAvoidingView, Image, Dimensions } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
+import { FontAwesome, Ionicons, Entypo } from '@expo/vector-icons';
+import CustomText from '../Components/CustomComponents/CustomText';
+import axios from 'axios';
+import AlertModal from '../Components/ModalComponents/AlertModal';
+import CustomInput from '../Components/CustomComponents/CustomInput';
+import PostModal from '../Components/ModalComponents/PostModal';
+import { SERVER_ADDRESS } from '../Components/ServerAddress';
+import imageUrls from '../JSONData/imageUrls.json';
 
 const BoardContent = ({ route, navigation }) => {
-
-    const { login, user } = useContext(UserContext);
-    const { No, Id, Writer, RegDate, Title, Content, Category } = route.params;
+    const [image, setImage] = useState([]);
+    const { No, user_image, Category } = route.params;
     const [checkUser, setCheckUser] = useState(false);
-    const [userData, setUserData] = useState("");
     const [DeleteBoardVisibled, setDeleteBoardVisibled] = useState(false);
     const [nullCommentsVisibled, setNullCommentsVisibled] = useState(false);
-    const [Comments, setComments] = useState("");
+    const [Comments, setComments] = useState('');
     const [CommentData, setCommentData] = useState([]);
+    const [postVisibled, setPostVisibled] = useState(false);
+    const [commentVisibled, setCommentVisibled] = useState(false);
+    const [modalPosition, setModalPosition] = useState({ y: 0, right: 0 });
+    const [userId, setUserId] = useState(null);
+    const buttonRef = useRef(null);
+    const [userPost, setUserPost] = useState([]);
 
-    const Time = (time) => {
-        return time.slice(0, 16);
-    }
+    const togglePostModal = () => {
+        if (postVisibled) {
+            setPostVisibled(false);
+        } else {
+            buttonRef.current.measure((fx, fy, width, height, px, py) => {
+                const screenWidth = Dimensions.get('window').width;
+                setModalPosition({ y: py + height, right: screenWidth - px + 135 });
+                setPostVisibled(true);
+            });
+        }
+    };
 
     useEffect(() => {
-        const WriterUser = async () => {
+        if (userPost[0]?.Image) {
             try {
-                const response = await axios.post(`${SERVER_ADDRESS}/userdb/userNname`, {
-                    Nname: Writer
-                });
-                const data = response.data;
-                setUserData(data);
-                if (data.length > 0 && data[0].id === user.id) {
-                    setCheckUser(true);
-                } else {
-                    setCheckUser(false);
+                const ParsedImage = JSON.parse(userPost[0]?.Image);
+                setImage(ParsedImage.map((item) => item.replace(/\\"/g, '')));
+            } catch (error) {
+                console.error(error);
+            }
+        }
+    }, [userPost[0]?.Image]);
+
+    const Time = (time) => {
+        if (!time) return '';
+        return time.slice(0, 16);
+    };
+
+    useEffect(() => {
+        const userPostData = async () => {
+            if (No) {
+                try {
+                    const response = await axios.post(
+                        `${SERVER_ADDRESS}/postdb/select`,
+                        { No: No },
+                        { withCredentials: true }
+                    );
+                    const data = response.data.data;
+                    const writerData = response.data.writer;
+                    setUserPost(data);
+                    setCheckUser(writerData);
+                    console.log(data);
+                    console.log(writerData);
+                } catch (error) {
+                    console.error(error);
                 }
             }
-            catch (error) {
-                console.log(error);
-            }
         };
-        WriterUser();
-    }, [user]);
+        userPostData();
+    }, [No]);
 
     const DeleteBoard = () => {
-        axios.post(`${SERVER_ADDRESS}/Postdb/delete`, {
-            Id: user.id,
-            Writer: Writer,
-            Title: Title,
-            Content: Content
-        })
-            .then(response => {
+        axios
+            .post(
+                `${SERVER_ADDRESS}/Postdb/delete`,
+                {
+                    Writer: Writer,
+                    Title: Title,
+                    Content: Content,
+                },
+                { withCredentials: true }
+            )
+            .then((response) => {
                 navigation.pop();
             })
-            .catch(error => {
-                console.log(error);
+            .catch((error) => {
+                console.error(error);
             });
     };
 
     const handleUpdateBoard = () => {
-        navigation.navigate("EditBoardContent", {
-            Id: Id,
+        navigation.navigate('EditBoardContent', {
             Writer: Writer,
             Title: Title,
             Content: Content,
-            RegDate: RegDate
+            image: image,
+            RegDate: RegDate,
         });
+        setPostVisibled(false);
     };
 
     const SelectComments = () => {
-        axios.post(`${SERVER_ADDRESS}/Commentdb/select`, { Post_Id: No })
-        .then(response => {
-            const data = response.data;
-            setCommentData(data);
-        })
-        .catch(error => {
-            console.log(error);
-        })
+        axios
+            .post(`${SERVER_ADDRESS}/Commentdb/select`, { Post_Id: No })
+            .then((response) => {
+                const data = response.data;
+                setCommentData(data);
+            })
+            .catch((error) => {
+                console.error(error);
+            });
     };
 
     const InsertComments = useCallback(() => {
-        if (Comments === "") {
+        if (Comments === '') {
             setNullCommentsVisibled(true);
-        }
-        else {
-            axios.post(`${SERVER_ADDRESS}/Commentdb/insert`, {
-                Post_Id: No,
-                User_Id: user.id,
-                Content: Comments
-            }
-            )
-                .then(response => {
-                })
-                .catch(error => {
-
-                    console.log(error);
+        } else {
+            axios
+                .post(
+                    `${SERVER_ADDRESS}/Commentdb/insert`,
+                    {
+                        Post_Id: No,
+                        Content: Comments,
+                    },
+                    { withCredentials: true }
+                )
+                .then((response) => {})
+                .catch((error) => {
+                    console.error(error);
                 });
-            setComments("");
+            setComments('');
         }
-    }, [No, Comments, user.id])
+    }, [No, Comments]);
+
+    const DeleteComments = useCallback(() => {
+        axios
+            .post(
+                `${SERVER_ADDRESS}/Commentdb/delete`,
+                {
+                    No: CommentData[0].No,
+                },
+                { withCredentials: true }
+            )
+            .then((response) => {})
+            .catch((error) => {
+                console.error(error);
+            });
+    });
 
     useFocusEffect(
         useCallback(() => {
@@ -109,91 +161,135 @@ const BoardContent = ({ route, navigation }) => {
     );
 
     return (
-        <KeyboardAvoidingView
-            style={{ flex: 1 }}
-        >
+        <KeyboardAvoidingView style={{ flex: 1 }}>
             <View style={styles.container}>
                 <View style={styles.TopContainer}>
-                    <TouchableOpacity
-                        style={{ flex: 1, alignItems: 'flex-start' }}
-                        onPress={() => navigation.pop()}
-                    >
-                        <FontAwesome name="angle-left" size={35} color="black" />
+                    <TouchableOpacity style={{ flex: 1, alignItems: 'flex-start' }} onPress={() => navigation.pop()}>
+                        <Image source={{ uri: imageUrls.left }} style={styles.iconImage} />
                     </TouchableOpacity>
 
-                    <AppText bold style={{ fontSize: 22, textAlign: 'center' }} allowFontScaling={false}>{Category}</AppText>
+                    <CustomText
+                        medium
+                        style={{ fontSize: 18, textAlign: 'center', lineHeight: 25 }}
+                        allowFontScaling={false}
+                    >
+                        {Category}
+                    </CustomText>
                     <View style={{ flex: 1 }} />
                 </View>
 
-                <ScrollView style={{ flexGrow: 1 }}>
-                    <View style={styles.WriteContaier}>
-                        <View style={{ flexDirection: 'row' }}>
-                            <Ionicons name="person-circle" size={50} style={styles.IconStyle} />
-                            <View style={styles.WriterView}>
-                                <AppText bold style={{ fontSize: 18 }} allowFontScaling={false}>{Writer}</AppText>
-                                <AppText bold style={{ color: '#979797' }} allowFontScaling={false}>{Time(RegDate)}</AppText>
-                            </View>
-                        </View>
-                        <View style={styles.TitleView}>
-                            <AppText bold style={{ fontSize: 20 }} allowFontScaling={false}>{Title}</AppText>
-                        </View>
-                        <View style={styles.ContentView}>
-                            <AppText style={{ fontSize: 15 }} allowFontScaling={false}>{Content}</AppText>
-                        </View>
-                        {checkUser ? (
-                            <View style={styles.BtnContainer}>
-                                <TouchableOpacity
-                                    style={[styles.BtnStyles, { right: '35%' }]}
-                                    onPress={() => setDeleteBoardVisibled(true)}
-                                >
-                                    <Ionicons name="trash-outline" size={25} color="#757575" />
-                                    <AppText bold style={styles.FontStyles} allowFontScaling={false}>삭제</AppText>
-                                </TouchableOpacity>
-
-                                <TouchableOpacity
-                                    style={styles.BtnStyles}
-                                    onPress={handleUpdateBoard}
-                                >
-                                    <SimpleLineIcons name="pencil" size={25} color="#757575" />
-                                    <AppText bold style={styles.FontStyles} allowFontScaling={false}>수정</AppText>
-                                </TouchableOpacity>
-                            </View>
-                        ) : null}
-                    </View>
-
-                    <View style={styles.line}></View>
-
-                    <View>
-                        {CommentData.map((data, index) => (
-                            <View key={index} style={styles.CommentsView}>
-                                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                    <Ionicons name="person-circle" size={50} style={styles.IconStyle} />
-                                    <View>
-                                        <AppText bold style={{ fontSize: 16 }} allowFontScaling={false}>
-                                            {Id === data.User_Id ? (<AppText bold style={{ color: '#608C27' }}>{data.User_Id} (작성자)</AppText>) : data.User_Id}
-                                        </AppText>
-                                        <AppText bold style={{ fontSize: 11, color: '#979797' }} allowFontScaling={false}>{data.RegDate}</AppText>
-                                    </View>
+                <View style={{ flex: 1 }}>
+                    <ScrollView style={{ flexGrow: 1, flex: 1 }}>
+                        <View style={styles.WriteContaier}>
+                            {checkUser ? (
+                                <View style={styles.BtnContainer}>
+                                    <TouchableOpacity ref={buttonRef} onPress={togglePostModal}>
+                                        <Entypo name="dots-three-vertical" size={20} color="black" />
+                                    </TouchableOpacity>
                                 </View>
-                                <AppText style={styles.ContentData} allowFontScaling={false}>{data.Content}</AppText>
+                            ) : null}
+                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                <Image source={{ uri: user_image }} style={styles.profileImage} />
+                                <View style={styles.WriterView}>
+                                    <CustomText
+                                        medium
+                                        style={{ fontSize: 15, lineHeight: 20 }}
+                                        allowFontScaling={false}
+                                    >
+                                        {userPost[0]?.Writer}
+                                    </CustomText>
+                                    <CustomText
+                                        medium
+                                        style={{ color: '#979797', lineHeight: 20, fontSize: 10 }}
+                                        allowFontScaling={false}
+                                    >
+                                        {Time(userPost[0]?.RegDate)}
+                                    </CustomText>
+                                </View>
                             </View>
-                        ))}
-                    </View>
-                </ScrollView>
+                            <View style={styles.TitleView}>
+                                <CustomText medium style={{ fontSize: 18, lineHeight: 25 }} allowFontScaling={false}>
+                                    {userPost[0]?.Title}
+                                </CustomText>
+                            </View>
+                            <View style={styles.ContentView}>
+                                <CustomText style={{ fontSize: 14, lineHeight: 25 }} allowFontScaling={false}>
+                                    {userPost[0]?.Content}
+                                </CustomText>
+                            </View>
+                            <ScrollView horizontal={true}>
+                                <View style={styles.ImageView}>
+                                    {image.map((item, index) => (
+                                        <View
+                                            key={index}
+                                            style={{ flex: 1, marginLeft: 5, marginRight: 5, marginTop: 5 }}
+                                        >
+                                            <Image
+                                                source={{ uri: item }}
+                                                style={{ width: 120, height: 120, borderRadius: 5 }}
+                                            />
+                                        </View>
+                                    ))}
+                                </View>
+                            </ScrollView>
+                        </View>
 
-                <View style={styles.TextInputContainer}>
-                    <CustomInput
-                        style={styles.TextInputStyle}
-                        placeholder="댓글을 입력하세요."
-                        value={Comments}
-                        onChangeText={setComments}
-                    />
-                    <TouchableOpacity
-                        style={styles.regBtnStyle}
-                        onPress={InsertComments}
-                    >
-                        <Entypo name="forward" size={35} color="#979797" />
-                    </TouchableOpacity>
+                        <View style={styles.line}></View>
+
+                        <View>
+                            {CommentData.map((data, index) => (
+                                <View key={index} style={styles.CommentsView}>
+                                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                        <Image source={{ uri: data?.image }} style={styles.commentProfileImage} />
+                                        <View style={styles.commentWriterStyles}>
+                                            <CustomText
+                                                medium
+                                                style={{ fontSize: 13, lineHeight: 20 }}
+                                                allowFontScaling={false}
+                                            >
+                                                {checkUser ? (
+                                                    <View>
+                                                        <CustomText
+                                                            medium
+                                                            style={{ color: '#3D8B4A', fontSize: 13, lineHeight: 20 }}
+                                                        >
+                                                            {data.User} (작성자)
+                                                        </CustomText>
+                                                    </View>
+                                                ) : (
+                                                    data.User
+                                                )}
+                                            </CustomText>
+                                            <CustomText
+                                                medium
+                                                style={{ fontSize: 10, color: '#979797', lineHeight: 18 }}
+                                                allowFontScaling={false}
+                                            >
+                                                {Time(data.RegDate)}
+                                            </CustomText>
+                                        </View>
+                                    </View>
+                                    <CustomText style={styles.ContentText} allowFontScaling={false}>
+                                        {data.Content}
+                                    </CustomText>
+                                </View>
+                            ))}
+                        </View>
+                    </ScrollView>
+                </View>
+
+                <View style={styles.TextinputContainer}>
+                    <View style={styles.TextinputView}>
+                        <CustomInput
+                            style={styles.TextinputStyle}
+                            placeholder="댓글을 입력하세요."
+                            value={Comments}
+                            onChangeText={setComments}
+                        />
+                        <TouchableOpacity style={styles.regBtnStyle} onPress={InsertComments}>
+                            <Image source={{ uri: imageUrls.submit }} style={styles.iconImage} />
+                        </TouchableOpacity>
+                    </View>
                 </View>
 
                 <AlertModal
@@ -214,53 +310,56 @@ const BoardContent = ({ route, navigation }) => {
                     onPress={() => setNullCommentsVisibled(false)}
                     showBtn={true}
                 />
+                <PostModal
+                    visible={postVisibled}
+                    position={modalPosition}
+                    onEditPress={handleUpdateBoard}
+                    onDeletePress={() => setDeleteBoardVisibled(true)}
+                />
             </View>
         </KeyboardAvoidingView>
-    )
-}
+    );
+};
 
 export default BoardContent;
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: 'white'
+        backgroundColor: 'white',
     },
     TopContainer: {
         flexDirection: 'row',
-        borderBottomWidth: 1,
-        borderBottomColor: 'black',
         padding: '3%',
-        alignItems: 'center'
+        alignItems: 'center',
     },
     WriteContaier: {
-        backgroundColor: '#DFDFDF',
+        backgroundColor: 'white',
         height: 'auto',
-        borderRadius: 10,
         margin: '3%',
         padding: '3%',
     },
     WriterView: {
-        padding: '2%'
+        padding: '2%',
     },
     TitleView: {
-        margin: '1%'
+        margin: '1%',
     },
     ContentView: {
-        padding: '2%'
+        padding: '2%',
     },
     line: {
-        borderBottomWidth: 1.5,
-        borderBottomColor: "#979797",
-        marginTop: '2%',
-        width: '95%',
-        alignSelf: 'center'
+        borderBottomWidth: 2,
+        borderBottomColor: '#EDEDED',
+        marginTop: '1%',
+        width: '100%',
+        alignSelf: 'center',
     },
     BtnContainer: {
         position: 'absolute',
         flexDirection: 'row',
-        top: 0,
-        right: 0,
+        top: 10,
+        right: -8,
         alignItems: 'center',
         paddingVertical: 15,
         paddingHorizontal: 10,
@@ -268,40 +367,69 @@ const styles = StyleSheet.create({
     },
     BtnStyles: {
         alignItems: 'center',
-        justifyContent: 'center'
+        justifyContent: 'center',
     },
     FontStyles: {
         fontSize: 12,
-        color: '#757575'
+        lineHeight: 18,
     },
-    IconStyle: {
-        color: '#9FD1FF',
-        alignSelf: 'center'
+    iconImage: {
+        width: 25,
+        height: 25,
     },
-    TextInputContainer: {
-        flexDirection: 'row',
+    TextinputContainer: {
         alignItems: 'center',
-        backgroundColor: 'white',
+        padding: '2%',
     },
-    TextInputStyle: {
-        flex: 1,
-        padding: '3%',
-        backgroundColor: '#DFDFDF',
-        fontSize: 13,
+    TextinputView: {
+        flexDirection: 'row',
         borderRadius: 15,
-        borderColor: '#DFDFDF',
-        margin: '2%'
+        height: 50,
+        width: '98%',
+        includeFontPadding: false,
+        justifyContent: 'space-between',
+        backgroundColor: '#F4F6F7',
+        alignItems: 'center',
+        paddingHorizontal: 10,
+    },
+    TextinputStyle: {
+        flex: 1,
+        height: '100%',
+        padding: 10,
     },
     regBtnStyle: {
-        padding: '2%',
-        marginRight: '2%',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginRight: '3%',
     },
     CommentsView: {
-        padding: '3%',
+        padding: '2.5%',
         justifyContent: 'center',
+        borderBottomWidth: 0.5,
+        borderBottomColor: '#B1B6AE',
     },
-    ContentData: {
-        marginLeft: '2%',
-        fontSize: 15
+    ContentText: {
+        marginLeft: '1%',
+        fontSize: 14,
+        lineHeight: 25,
+        margin: '1%',
+    },
+    ImageView: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+    },
+    profileImage: {
+        width: 45,
+        height: 45,
+        borderRadius: 30,
+    },
+    commentProfileImage: {
+        width: 30,
+        height: 30,
+        borderRadius: 30,
+    },
+    commentWriterStyles: {
+        flex: 1,
+        marginLeft: '3%',
     },
 });

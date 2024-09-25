@@ -1,157 +1,91 @@
-import React, { useState, useCallback, useEffect } from "react";
-import { useFocusEffect } from "@react-navigation/native";
-import { View, StyleSheet, TouchableOpacity, FlatList } from  'react-native'
-import { Ionicons } from '@expo/vector-icons';
-import axios from "axios";
-import AppText from "../Components/AppText";
-import SERVER_ADDRESS from "../Components/ServerAddress";
+import React, { useState, useCallback, useEffect } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
+import { View, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import axios from 'axios';
+import CustomText from '../Components/CustomComponents/CustomText';
+import { SERVER_ADDRESS } from '../Components/ServerAddress';
+import imageUrls from '../JSONData/imageUrls.json';
+import PostComponent from '../Components/PostComponents/PostComponent';
 
 const Community = ({ navigation }) => {
-
-    const [BoardData, setBoardDate] = useState([]);
+    const [boardData, setBoardData] = useState([]);
     const [selectedCategory, setSelectCategory] = useState(1);
-    const [focusedCategory, setFocusedCategory] = useState("");
+    const [category, setCategory] = useState([]);
 
-    const handleFocusedCategory = () => {
-        setFocusedCategory(styles.FocusCategory);
-    }
-
-    const Time = (time) => {
-        return time.slice(0, 16);
-    }
-    
-    const SelectBoard = async () => {
+    const CountComment = useCallback(async () => {
         try {
-            const response = await axios.get(`${SERVER_ADDRESS}/Postdb/select`, {
-                params: {
-                    Category: selectedCategory
-                }
+            const response = await axios.post(`${SERVER_ADDRESS}/postdb/selectCategory`, {
+                Category: selectedCategory,
             });
             const data = response.data;
-            setBoardDate(data);
+            setBoardData(data);
+        } catch (error) {
+            console.error(error);
         }
-        catch (error) {
-            console.log(error);
-        }
-    };
-    
+    }, [selectedCategory]);
+
     useFocusEffect(
         useCallback(() => {
-            SelectBoard();
-        }, [SelectBoard])
+            CountComment();
+        }, [CountComment])
     );
 
-    const renderBoardData = ({ item }) => (
-        <TouchableOpacity 
-            onPress = {() => navigation.navigate("BoardContent", {
-                No: item.No,
-                Id: item.Id,
-                Writer: item.Writer,
-                RegDate: item.RegDate,
-                Title: item.Title,
-                Content: item.Content,
-                Category: categoryValue[item.Category]
-            })}
-        >
-            <View style = { styles.BoardView }>
-                <View style = {{ flexDirection: 'row' }}>
-                    <Ionicons name="person-circle" size={ 40 } color="#9FD1FF" />
-                    <View style = {{ marginLeft: 5 }}>
-                        <AppText bold style = { styles.WriterStyle } allowFontScaling = { false }>{ item.Writer }</AppText>
-                        <AppText bold style = { styles.RegDateStyle } allowFontScaling = { false }>{ Time(item.RegDate) }</AppText>
-                    </View>
-                </View>
-                <AppText bold style = { styles.TitleStyle } allowFontScaling = { false }>{ item.Title }</AppText>
-            </View>
-        </TouchableOpacity>
-    );
-
-    const categoryValue = {
-        1: '자유게시판',
-        2: '질문게시판',
-        3: '가드닝팁',
-        4: '식물자랑',
-        5: '플렌테리어'
-    }
+    useEffect(() => {
+        const postCategory = () => {
+            axios
+                .post(`${SERVER_ADDRESS}/postcategory/category`)
+                .then((response) => {
+                    const data = response.data;
+                    setCategory(data);
+                })
+                .catch((error) => {
+                    console.error(error);
+                });
+        };
+        postCategory();
+    }, []);
 
     return (
-        <View style = {{ flex: 1, backgroundColor: 'white' }}>
-            <View style = { styles.TopContainer }>
-                <TouchableOpacity
-                    onPress = {() => setSelectCategory(1)}
-                    style = {[styles.CategoryStyles, selectedCategory === 1 ? styles.FocusCategory : null]}
-                >
-                    <AppText bold 
-                        style = {{color: selectedCategory === 1 ? 'black' : '#979797'}}
-                        allowFontScaling = { false }
-                    >
-                        자유게시판
-                    </AppText>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                    onPress = {() => setSelectCategory(2)}
-                    style = {[styles.CategoryStyles, selectedCategory === 2 ? styles.FocusCategory : null]}
-                >
-                    <AppText bold 
-                        style = {{color: selectedCategory === 2 ? 'black' : '#979797'}}
-                        allowFontScaling = { false }
-                    >
-                        질문게시판
-                    </AppText>
-                </TouchableOpacity>
-                
-                <TouchableOpacity
-                    onPress = {() => setSelectCategory(3)}
-                    style = {[styles.CategoryStyles, selectedCategory === 3 ? styles.FocusCategory : null]}
-                >
-                    <AppText bold 
-                        style = {{color: selectedCategory === 3 ? 'black' : '#979797'}}
-                        allowFontScaling = { false }
-                    >
-                        가드닝팁
-                    </AppText>
-                </TouchableOpacity>
-                
-                <TouchableOpacity
-                    onPress = {() => setSelectCategory(4)}
-                    style = {[styles.CategoryStyles, selectedCategory === 4 ? styles.FocusCategory : null]}
-                >
-                    <AppText bold 
-                        style = {{color: selectedCategory === 4 ? 'black' : '#979797'}}
-                        allowFontScaling = { false }
-                    >
-                        식물자랑
-                    </AppText>
-                </TouchableOpacity>
-                
-                <TouchableOpacity
-                    onPress = {() => setSelectCategory(5)}
-                    style = {[styles.CategoryStyles, selectedCategory === 5 ? styles.FocusCategory : null]}
-                >
-                    <AppText bold 
-                        style = {{color: selectedCategory === 5 ? 'black' : '#979797'}}
-                        allowFontScaling = { false }
-                    >
-                        플렌테리어
-                    </AppText>
+        <View style={styles.container}>
+            <View style={styles.searchView}>
+                <TouchableOpacity style={styles.searchBtn} onPress={() => navigation.navigate('CommunitySearch')}>
+                    <Image source={{ uri: imageUrls?.searchBtn }} style={styles.searchIconImage} />
+                    <CustomText style={styles.searchBtnText}>게시글을 입력하세요.</CustomText>
                 </TouchableOpacity>
             </View>
 
-            <View style = {{ height: '81%' }}>
-                <FlatList 
-                    data = { BoardData }
-                    renderItem = { renderBoardData }
-                    keyExtractor = {(item, index) => index.toString()}
-                />
+            <View style={styles.categoryView}>
+                {category.map((item) => (
+                    <TouchableOpacity
+                        key={item.Id}
+                        onPress={() => setSelectCategory(item.Id)}
+                        style={[styles.CategoryStyles, selectedCategory === item.Id ? styles.FocusCategory : null]}
+                    >
+                        <CustomText
+                            bold={selectedCategory === item.Id}
+                            style={{
+                                color: selectedCategory === item.Id ? 'black' : '#979797',
+                                lineHeight: 30,
+                            }}
+                            allowFontScaling={false}
+                        >
+                            {item.category}
+                        </CustomText>
+                    </TouchableOpacity>
+                ))}
             </View>
 
-            <View style = {styles.WriteBtnContainer}>
-                <TouchableOpacity 
-                    style = {styles.WriteBtnStyle}
-                    onPress = {() => navigation.navigate("WriteBoard", { selectedCategory: selectedCategory })}
+            <PostComponent data={boardData} showTopView={false} showCategory={false} />
+
+            <View style={styles.WriteBtnContainer}>
+                <TouchableOpacity
+                    style={styles.WriteBtnStyle}
+                    onPress={() => navigation.navigate('WriteBoard', { selectedCategory: selectedCategory })}
                 >
-                    <AppText bold style = {{ fontSize: 18, justifyContent: 'center' }} allowFontScaling = { false }>글 쓰기</AppText>
+                    <Image source={{ uri: imageUrls.write_white }} style={styles.iconImage} />
+                    <CustomText bold style={styles.writeFont} allowFontScaling={false}>
+                        글 쓰기
+                    </CustomText>
                 </TouchableOpacity>
             </View>
         </View>
@@ -160,10 +94,46 @@ const Community = ({ navigation }) => {
 
 export default Community;
 
-const styles = StyleSheet.create({ 
-    TopContainer: {
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: 'white',
+    },
+    searchView: {
+        flex: 1,
+        maxHeight: 60,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    searchBtn: {
+        borderRadius: 10,
+        backgroundColor: '#F8F8F8',
+        width: '95%',
+        height: 50,
+        marginTop: '5%',
+        alignItems: 'center',
+        justifyContent: 'flex-start',
+        flexDirection: 'row',
+    },
+    searchIconImage: {
+        width: 25,
+        height: 25,
+        marginLeft: '3%',
+    },
+    searchBtnText: {
+        color: '#757575',
+        fontSize: 13,
+        lineHeight: 20,
+        marginLeft: '2%',
+    },
+    iconImage: {
+        width: 25,
+        height: 25,
+    },
+    categoryView: {
         flexDirection: 'row',
         padding: '2%',
+        marginTop: '5%',
         marginBottom: '2%',
         alignItems: 'center',
         justifyContent: 'space-around',
@@ -171,42 +141,37 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     CategoryStyles: {
-        padding: '2%',
         alignItems: 'center',
     },
     FocusCategory: {
-        borderBottomWidth: 2,
-    },
-    BoardView: {
         borderBottomWidth: 1,
-        borderBottomColor: '#CDD0CB',
-        padding: '2.5%',
-        backgroundColor: 'white'
-    },
-    WriterStyle: {
-        fontSize: 20
-    },
-    RegDateStyle: {
-        fontSize: 12,
-        color: '#979797',
-    },
-    TitleStyle: {
-        fontSize: 22,
-        padding: '1%',
+        borderBottomColor: 'black',
     },
     WriteBtnContainer: {
-        position: 'absolute',
-        bottom: '1%',
-        right: '4%',
-        width: '32%',
-        height: '7%',
+        flex: 1,
+        maxHeight: 70,
+        width: '100%',
         zIndex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     WriteBtnStyle: {
-        backgroundColor: '#CBDDB4',
+        flexDirection: 'row',
+        backgroundColor: '#3DC373',
         alignItems: 'center',
-        justifyContent: 'center', 
-        height: "92%",
-        borderRadius: 20
-    }
+        justifyContent: 'center',
+        width: '35%',
+        height: 45,
+        borderRadius: 20,
+    },
+    writeFont: {
+        fontSize: 18,
+        color: 'white',
+        lineHeight: 25,
+    },
+    iconImage: {
+        width: 25,
+        height: 25,
+        marginRight: '5%',
+    },
 });

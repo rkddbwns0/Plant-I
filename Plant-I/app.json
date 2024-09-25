@@ -1,21 +1,21 @@
 {
-  "expo": {
-    "name": "Project",
-    "slug": "Project",
-    "version": "1.0.0",
-    "orientation": "portrait",
-    "userInterfaceStyle": "light",
-    "assetBundlePatterns": [
-      "**/*"
-    ],
-    "ios": {
-      "supportsTablet": true
-    },
-    "android": {
-      "permissions": ["CAMERA", "CAMERA_ROLL"]
-    },
-    "web": {
-    
+    "expo": {
+        "name": "Project",
+        "slug": "Project",
+        "version": "1.0.0",
+        "orientation": "portrait",
+        "userInterfaceStyle": "light",
+        "assetBundlePatterns": ["**/*"],
+        "splash": {
+            "image": "https://rkddbwns123.mycafe24.com/gnuboard5/AppImage/splash1.webp",
+            "resizeMode": "cover"
+        },
+        "ios": {
+            "supportsTablet": true
+        },
+        "android": {
+            "permissions": ["CAMERA", "CAMERA_ROLL"]
+        },
+        "web": {}
     }
-  }
 }

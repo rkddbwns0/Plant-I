@@ -1,231 +1,361 @@
-import React, { useCallback, useEffect, useState } from "react";
-import { Feather } from "@expo/vector-icons";
-import {
-  View,
-  TouchableOpacity,
-  FlatList,
-  StyleSheet,
-  KeyboardAvoidingView,
-  Image
-} from "react-native";
-import axios from "axios";
-import AppText from "../Components/AppText";
-import CustomInput from '../Components/CustomInput';
-import { useFocusEffect } from "@react-navigation/native";
-import SERVER_ADDRESS from "../Components/ServerAddress";
+import React, { Children, useCallback, useEffect, useState } from 'react';
+import { View, TouchableOpacity, StyleSheet, Image, ScrollView } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
+import axios from 'axios';
+import CustomText from '../Components/CustomComponents/CustomText';
+import ToggleButton from '../Components/ToggleButton';
+import { SERVER_ADDRESS } from '../Components/ServerAddress';
+import imageUrls from '../JSONData/imageUrls.json';
+import AlertModal from '../Components/ModalComponents/AlertModal';
 
 const Search = ({ navigation }) => {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState([]);
-  const [tags, setTags] = useState([]);
-  const [tagVisibled, setTagVisibled] = useState(true);
-  const [selectTags, setSelectTags] = useState("");
+    const [tagResults, setTagResults] = useState([]);
+    const [selectTypeTag, setSelectTypeTag] = useState('');
+    const [popularPlants, setPopularPlants] = useState([]);
+    const [toggleValue, setToggleValue] = useState(0);
+    const [modalVisibled, setModalVisibled] = useState(false);
 
-  const SearchData = async () => {
-    try {
-      const response = await axios.get(`${SERVER_ADDRESS}/plantdb/search`);
-      const data = response.data;
-      const filterData = data.filter(item => item.Pname.toLowerCase().includes(searchQuery.toLowerCase()));
-      if(searchQuery === "") {
-        setTagVisibled(true);
-      } else {
-        setSearchResults(filterData);
-      }
-    }
-    catch (error) {
-      console.log(error);
+    const handleToggleChange = (value) => {
+        setToggleValue(value);
     };
-  }
 
-  useFocusEffect(
-    useCallback(() => {
-      const Tag = () => {
-        axios.post(`${SERVER_ADDRESS}/tagdb/tag`)
-        .then(response => {
-          const data = response.data;
-          setTags(data);
-        })
-        .catch(error => {
-          console.log(error);
-        })
-      }
-    Tag();
-    return () => {}
-    }, [])
-  );
+    const chunkedData = [];
 
-  const handleSearchData = (text) => {
-    setSearchQuery(text);
-    setTagVisibled(!text);
-  };
+    const plantTypeTag = ['선인장', '관엽식물', '허브', '다육이', '난초', '그 외'];
 
+    const selectTagData = () => {
+        axios
+            .post(`${SERVER_ADDRESS}/plantdb/selectTag`, {
+                PlantType: selectTypeTag,
+                Children: toggleValue,
+            })
+            .then((response) => {
+                const data = response.data;
+                setTagResults(data);
+                if (selectTypeTag === '') {
+                    setModalVisibled(true);
+                } else {
+                    navigation.navigate('TagResult', {
+                        result: data,
+                        plantTypeTag: selectTypeTag,
+                        child: toggleValue,
+                    });
+                }
+            })
+            .catch((error) => {
+                console.error(error);
+            });
+    };
 
-  const selectTagData = (tag) => {
-    axios.post(`${SERVER_ADDRESS}/plantdb/selectTag`, {
-      PlantType: tag
-    })
-    .then(response => {
-      const data = response.data.map(item=>item);
-      setSearchResults(data);
-      console.log(searchResults)
-    })
-    .catch(error => {
-      console.log(error);
-    })
-  }
+    useEffect(() => {
+        const popularPlantsData = () => {
+            axios
+                .post(`${SERVER_ADDRESS}/userplantdb/popular`)
+                .then((response) => {
+                    const data = response.data;
+                    setPopularPlants(data);
+                })
+                .catch((error) => {
+                    console.error(error);
+                });
+        };
+        popularPlantsData();
+    }, []);
 
-  const handleTagSelect = (tag) => {
-    selectTagData(tag);
-    setTagVisibled(false);
-    console.log(tag);
-  }
+    for (let i = 0; i < popularPlants.length; i += 3) {
+        chunkedData.push(popularPlants.slice(i, i + 3));
+    }
 
-  useEffect(() => {
-    SearchData();
-  }, [searchQuery]);
+    const handleTypeTagSelect = (tag) => {
+        if (selectTypeTag === tag) {
+            setSelectTypeTag('');
+        } else {
+            setSelectTypeTag(tag);
+        }
+    };
 
-  const renderFilterItems = ({ item, index }) => {
-    return(
-      <TouchableOpacity 
-        style={[styles.resultItem, { width: item.Image ? '48%' : '48%' }]}
-        onPress={() => navigation.navigate("PlantDetail", {Pname: item.Pname})}
-      >
-        <Image 
-          source={{uri: item.Image}}
-          style = {styles.imageContainer}
-        />
-        <AppText bold style = {styles.PnameStyles}>{item.Pname}</AppText>
-      </TouchableOpacity>
-  )};
-
-  const TagsData = ({ item }) => {
-
-    return (
-      <View>
-        <AppText bold style = {{ fontSize: 18 }}>추천 검색어</AppText>
-        <View>
-          <FlatList
-            data={tags}
-            keyExtractor={(item, index) => index.toString()}
-            renderItem={({ item, index }) => (
-              <TouchableOpacity
-                style={styles.hashtagItem}
-                onPress={() => handleTagSelect(item.Tag_Name)}
-              >
-                <AppText bold style={styles.hashtagItemText}>{item.Tag_Name}</AppText>
-              </TouchableOpacity>
-            )}
-            horizontal={true}
-            showsHorizontalScrollIndicator={false}
-          />
-        </View>
-      </View>
+    useFocusEffect(
+        useCallback(() => {
+            setSelectTypeTag('');
+        }, [])
     );
 
-  }
-  
-  return (
-    <View style={styles.container}>
-      <KeyboardAvoidingView>
-        <View style={styles.searchContainer}>
-            <CustomInput
-              style={styles.searchInput}
-              placeholder="식물을 검색해보세요"
-              value={searchQuery}
-              onChangeText={handleSearchData}
-              keyboardShouldPersistTaps="handled"
-            />
-            <TouchableOpacity style={styles.searchButton} onPress={() => SearchData()}>
-              <Feather name="search" size={24} color="black" />
-            </TouchableOpacity>
-        </View>
-      </KeyboardAvoidingView>
-      <View style={styles.line}></View>
+    return (
+        <View style={styles.container}>
+            <ScrollView style={{ flex: 1 }}>
+                <View style={styles.topContainer}>
+                    <CustomText medium style={styles.topFont}>
+                        궁금한 식물을 찾아보세요.
+                    </CustomText>
+                </View>
+                <View style={styles.searchContainer}>
+                    <TouchableOpacity style={styles.searchButton} onPress={() => navigation.navigate('SearchResult')}>
+                        <Image source={{ uri: imageUrls?.searchBtn }} style={styles.iconImage} />
+                        <CustomText style={styles.searchBtnText}>식물 이름을 검색하세요.</CustomText>
+                    </TouchableOpacity>
+                </View>
 
-      {(searchQuery.length > 0 || !tagVisibled) && (
-        <View style = {{ height: '94%', flex: 1 }}>
-          <FlatList
-            data={searchResults}
-            keyExtractor={(item, index) => index.toString()}
-            renderItem={renderFilterItems}
-            horizontal={false}
-            numColumns={2}
-          />
+                <View style={styles.tagContainer}>
+                    <View style={styles.tagView}>
+                        <View style={styles.fontView}>
+                            <CustomText bold style={{ ...styles.fontStyles, marginBottom: '8%' }}>
+                                원하는 식물의 종류가 있으시나요?
+                            </CustomText>
+                        </View>
+                        <View style={styles.tagItems}>
+                            {plantTypeTag.map((tag, index) => (
+                                <View key={index} style={styles.tagBtnView}>
+                                    <TouchableOpacity
+                                        style={[styles.tagBtnStyles, selectTypeTag === tag && styles.tagBtnSelected]}
+                                        onPress={() => handleTypeTagSelect(tag)}
+                                    >
+                                        <CustomText style={styles.tagFontStyles}>{tag}</CustomText>
+                                    </TouchableOpacity>
+                                </View>
+                            ))}
+                        </View>
+
+                        <View style={styles.childToggleView}>
+                            <View style={styles.fontView}>
+                                <CustomText bold style={styles.fontStyles}>
+                                    반려동물 또는 아이랑 같이 지내시나요?
+                                </CustomText>
+                            </View>
+                            <View style={styles.toggleView}>
+                                <ToggleButton onToggle={handleToggleChange} />
+                            </View>
+                        </View>
+
+                        <View style={styles.btnView}>
+                            <TouchableOpacity
+                                style={styles.btnStyle}
+                                onPress={() => {
+                                    selectTagData();
+                                }}
+                            >
+                                <CustomText bold style={styles.btnFont}>
+                                    검색하기
+                                </CustomText>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+
+                <View style={styles.popularView}>
+                    <CustomText bold style={styles.popularText}>
+                        인기있는 식물
+                    </CustomText>
+                    {chunkedData.map((row, rowIndex) => (
+                        <View key={rowIndex} style={styles.popularPlantStyles}>
+                            {row.map((item, index) => (
+                                <TouchableOpacity
+                                    key={index}
+                                    style={styles.plantBtnStyles}
+                                    onPress={() => navigation.navigate('PlantDetail', { Pname: item?.Pname })}
+                                >
+                                    <Image source={{ uri: item?.Image }} style={styles.plantImages} />
+                                    <CustomText style={styles.plantText}>{item?.Pname}</CustomText>
+                                </TouchableOpacity>
+                            ))}
+                        </View>
+                    ))}
+                </View>
+            </ScrollView>
+            <AlertModal
+                title="식물 종류를 선택해 주세요."
+                visible={modalVisibled}
+                showBtn={true}
+                onRequestClose={() => setModalVisibled(false)}
+                onPress={() => setModalVisibled(false)}
+                BtnText="확인"
+            />
         </View>
-      )}
-      {tagVisibled && <TagsData />}
-    </View>
-  );
+    );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: '6%',
-    backgroundColor: 'white',
-    width: '100%'
-  },
-  searchContainer: {
-    flexShrink: 0,
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 20,
-    borderWidth: 1.5,
-    borderColor: "#000000",
-    borderRadius: 1,
-    overflow: "hidden",
-    backgroundColor: "#F0F0F0",
-  },
-  searchInput: {
-    flex: 1,
-    padding: '3%',
-  },
-  searchButton: {
-    padding: "3%",
-    backgroundColor: "#F0F0F0",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  line: {
-    borderBottomWidth: 1,
-    borderBottomColor: "#000000",
-    marginBottom: '2%',
-  },
-  resultItem: {
-    height: 185 ,
-    marginTop: "3%",
-    marginRight: "4%",
-    borderRadius: 5,
-  },
-  imageContainer: {
-    alignItems: "center",
-    justifyContent: "center",
-    height: 160,
-    width: '100%',
-    borderRadius: 5
-  },
-  PnameStyles: {
-    alignSelf: 'center',
-    top: '5%',
-    fontSize: 12
-  },
-  hashtagItem: {
-    marginRight: 10,
-    marginTop: 15,
-    alignItems: "center",
-    justifyContent: "center",
-    flex: 1,
-    padding: 5,
-    backgroundColor: "#DFDFDF",
-    width: 105,
-    height: 30,
-    borderRadius: 5,
-    alignSelf: "center",
-  },
-  hashtagItemText: {
-    fontSize: 13
-  },
+    container: {
+        flex: 1,
+        backgroundColor: 'white',
+    },
+    topContainer: {
+        flex: 1,
+        height: 60,
+        borderBottomWidth: 1,
+        borderBottomColor: '#EDEDED',
+        justifyContent: 'center',
+    },
+    topFont: {
+        fontSize: 15,
+        lineHeight: 20,
+        marginLeft: '4%',
+    },
+    searchContainer: {
+        alignSelf: 'center',
+        alignItems: 'center',
+        marginBottom: '3%',
+        width: '100%',
+    },
+    searchInput: {
+        flex: 1,
+        includeFontPadding: false,
+        height: 50,
+    },
+    searchButton: {
+        borderRadius: 10,
+        backgroundColor: '#F8F8F8',
+        width: '95%',
+        height: 50,
+        marginTop: '5%',
+        alignItems: 'center',
+        justifyContent: 'flex-start',
+        flexDirection: 'row',
+    },
+    searchBtnText: {
+        color: '#757575',
+        fontSize: 13,
+        lineHeight: 20,
+        marginLeft: '2%',
+    },
+    resultItem: {
+        height: 185,
+        marginTop: '3%',
+        marginRight: '4%',
+        borderRadius: 5,
+    },
+    imageContainer: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: 160,
+        width: '100%',
+        borderWidth: 0.5,
+        borderColor: 'black',
+        borderRadius: 5,
+    },
+    PnameStyles: {
+        alignSelf: 'center',
+        fontSize: 12,
+    },
+    iconImage: {
+        width: 25,
+        height: 25,
+        marginLeft: '3%',
+    },
+    tagContainer: {
+        flex: 1,
+        marginTop: '2%',
+        width: '95%',
+        alignSelf: 'center',
+    },
+    tagView: {
+        flex: 1,
+        width: '100%',
+        height: 250,
+        backgroundColor: '#F8F8F8',
+        borderRadius: 8,
+        justifyContent: 'center',
+    },
+    tagItems: {
+        flex: 1,
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        justifyContent: 'space-between',
+        bottom: '10%',
+        alignItems: 'center',
+    },
+    tagBtnView: {
+        width: '28%',
+        marginHorizontal: '2.5%',
+        marginVertical: '2%',
+        justifyContent: 'center',
+    },
+    tagBtnStyles: {
+        backgroundColor: 'white',
+        width: '100%',
+        height: 32,
+        borderRadius: 10,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: '#B1B6AE',
+    },
+    tagFontStyles: {
+        fontSize: 13,
+        lineHeight: 20,
+    },
+    fontView: {
+        flex: 1,
+        marginTop: '2%',
+        marginLeft: '4%',
+        marginVertical: '1%',
+        justifyContent: 'center',
+    },
+    fontStyles: {
+        fontSize: 12,
+        lineHeight: 20,
+    },
+    childToggleView: {
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: '5%',
+    },
+    toggleView: {
+        marginRight: '5%',
+    },
+    btnView: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+        bottom: '8%',
+    },
+    btnStyle: {
+        backgroundColor: '#3DC373',
+        width: '85%',
+        height: 50,
+        borderRadius: 15,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    btnFont: {
+        fontSize: 15,
+        lineHeight: 20,
+        color: 'white',
+    },
+    tagBtnSelected: {
+        borderColor: '#3DC373',
+    },
+    popularView: {
+        flex: 1,
+        paddingHorizontal: '3%',
+        marginTop: '3%',
+    },
+    popularText: {
+        fontSize: 15,
+    },
+    popularPlantStyles: {
+        flex: 1,
+        flexDirection: 'row',
+    },
+    plantBtnStyles: {
+        height: 140,
+        marginTop: '2%',
+        marginRight: '4%',
+        width: '30%',
+    },
+    plantImages: {
+        alignSelf: 'center',
+        height: 110,
+        width: '100%',
+        borderRadius: 5,
+        borderWidth: 0.5,
+        borderColor: '#8E8E8E',
+    },
+    plantText: {
+        fontSize: 13,
+        lineHeight: 20,
+        textAlign: 'center',
+    },
 });
 
 export default Search;
-

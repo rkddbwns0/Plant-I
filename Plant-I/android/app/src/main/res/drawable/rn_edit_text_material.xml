@@ -13,6 +13,16 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <color android:color="#FFFFFF" />
+    </item>
+    <item>
+        <bitmap
+            android:gravity="center"
+            android:src="@mipmap/ic_launcher" />
+    </item>
+</layer-list>
 <inset xmlns:android="http://schemas.android.com/apk/res/android"
        android:insetLeft="@dimen/abc_edit_text_inset_horizontal_material"
        android:insetRight="@dimen/abc_edit_text_inset_horizontal_material"
