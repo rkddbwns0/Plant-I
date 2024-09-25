@@ -20,16 +20,16 @@ router.get('/weatherInfo', async (req, res) => {
 
         if (weatherId >= 200 && weatherId < 600) {
             weatherCondition = 'Rainy';
-            weatherImages = 'https://rkddbwns123.mycafe24.com/gnuboard5/weatherImages/rainy.webp';
+            weatherImages = '';
         } else if (weatherId >= 600 && weatherId < 623) {
             weatherCondition = 'Snowy';
-            weatherImages = 'https://rkddbwns123.mycafe24.com/gnuboard5/weatherImages/snowy.webp';
+            weatherImages = '';
         } else if ((weatherId >= 701 && weatherId < 782) || (weatherId >= 801 && weatherId < 805)) {
             weatherCondition = 'Cloudy';
-            weatherImages = 'https://rkddbwns123.mycafe24.com/gnuboard5/weatherImages/cloudy.webp';
+            weatherImages = '';
         } else if (weatherId === 800) {
             weatherCondition = 'Sunny';
-            weatherImages = 'https://rkddbwns123.mycafe24.com/gnuboard5/weatherImages/sunny.webp';
+            weatherImages = '';
         }
 
         const weatherData = {
