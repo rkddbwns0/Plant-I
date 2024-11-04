@@ -1,0 +1,30 @@
+{
+    "expo": {
+        "name": "Plant-I",
+        "slug": "Project",
+        "version": "1.0.0",
+        "orientation": "portrait",
+        "userInterfaceStyle": "light",
+        "assetBundlePatterns": ["**/*"],
+        "ios": {
+            "supportsTablet": true,
+            "bundleIdentifier": "com.kyjdlqslek.Project"
+        },
+        "android": {
+            "package": "com.kyjdlqslek.Project",
+            "versionCode": 1,
+            "permissions": ["CAMERA", "LOCATION", "NOTIFICATIONS"]
+        },
+        "web": {},
+        "extra": {
+            "eas": {
+                "projectId": "feafdd35-3b70-4f5d-b5e2-638cbd07c7ec"
+            }
+        },
+        "runtimeVersion": "1.0.0",
+        "updates": {
+            "url": "https://u.expo.dev/feafdd35-3b70-4f5d-b5e2-638cbd07c7ec"
+        },
+        "plugins": ["expo-build-properties"]
+    }
+}

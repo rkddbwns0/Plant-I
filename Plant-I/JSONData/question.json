@@ -1,0 +1,84 @@
+{
+    "question1": {
+        "question": "식물을 주로 어떤 공간에서\n키우시나요?",
+        "answers": [{ "value": "침실(안방)" }, { "value": "거실" }, { "value": "베란다" }, { "value": "야외" }]
+    },
+    "question2": {
+        "question": "아기 또는 반려동물을 키우시나요?",
+        "answers": [{ "value": "네" }, { "value": "아니오" }]
+    },
+    "ieQuestions": [
+        {
+            "question": "주기적으로 새로운 친구를\n만드시는 편인가요?",
+            "answers": [
+                { "text": "네", "mbti": "E" },
+                { "text": "아니요", "mbti": "I" }
+            ]
+        },
+        {
+            "question": "혼자보다는 다른 사람과 시간을\n보내고 싶어하는 편인가요?",
+            "answers": [
+                { "text": "네", "mbti": "E" },
+                { "text": "아니요", "mbti": "I" }
+            ]
+        },
+        {
+            "question": "관심이 가는 사람에게 다가가서 대화를\n시작하는 것이 어려운 편인가요?",
+            "answers": [
+                { "text": "네", "mbti": "I" },
+                { "text": "아니요", "mbti": "E" }
+            ]
+        },
+        {
+            "question": "단체에서 지도자 역할을 맡는 일은\n가능한 피하고 싶은 편인가요?",
+            "answers": [
+                { "text": "네", "mbti": "I" },
+                { "text": "아니요", "mbti": "E" }
+            ]
+        },
+        {
+            "question": "다른 사람의 주의를 끌지 않으려고\n하는 편인가요?",
+            "answers": [
+                { "text": "네", "mbti": "I" },
+                { "text": "아니요", "mbti": "E" }
+            ]
+        }
+    ],
+    "jpQuestions": [
+        {
+            "question": "일정이나 목록으로 계획을 세우는\n일을 좋아하는 편인가요?",
+            "answers": [
+                { "text": "네", "mbti": "J" },
+                { "text": "아니요", "mbti": "P" }
+            ]
+        },
+        {
+            "question": "하루 일정을 계획하기 보다는 즉흥적으로 하고\n싶은 일을 하는 것을 좋아하는 편인가요?",
+            "answers": [
+                { "text": "네", "mbti": "P" },
+                { "text": "아니요", "mbti": "J" }
+            ]
+        },
+        {
+            "question": "일이 잘못될까 봐 자주 걱정하는 편인가요?",
+            "answers": [
+                { "text": "네", "mbti": "J" },
+                { "text": "아니요", "mbti": "P" }
+            ]
+        },
+        {
+            "question": "휴식을 취하기 전에 집안일을 먼저\n끝내는 것을 원하는 편인가요?",
+            "answers": [
+                { "text": "네", "mbti": "J" },
+                { "text": "아니요", "mbti": "P" }
+            ]
+        },
+        {
+            "question": "해야 할 일을 마지막까지 미루는\n일이 많은 편인가요?",
+            "answers": [
+                { "text": "네", "mbti": "P" },
+                { "text": "아니요", "mbti": "J" }
+            ]
+        }
+    ]
+}
